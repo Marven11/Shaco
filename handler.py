@@ -274,13 +274,14 @@ class Shaco(AgentType):
 
         try:
             self.builder_send_message(cliid, MessageType.Info, "initializing")
-            if not which("cmake"):
+            is_flake_exists = path.exists("flake.nix")
+            if not is_flake_exists and not which("cmake"):
                 self.builder_send_message(cliid, MessageType.Error, "cmake not found")
                 return
-            if not which("make"):
+            if not is_flake_exists and not which("make"):
                 self.builder_send_message(cliid, MessageType.Error, "make not found")
                 return
-            if not which("clang"):
+            if not is_flake_exists and not which("clang"):
                 self.builder_send_message(cliid, MessageType.Error, "Clang compiler not found")
                 return
             if not path.exists('./CMakeLists.txt'):
@@ -368,13 +369,16 @@ class Shaco(AgentType):
                 print(f"Creating path {tmppath}")
                 makedirs(tmppath, exist_ok=True)
                 
-                print("Executing cmake compile command")
-                out = subprocess.check_output(f'cmake -S . -B {tmppath} {flags}', shell=True, stderr=subprocess.STDOUT)
+                if path.exists("flake.nix"):
+                    out = subprocess.check_output(f"nix develop .#{architecture}_compile --command bash -c 'cmake -S . -B {tmppath} {flags} && make -C {tmppath}'", shell=True, stderr=subprocess.STDOUT)
+                else:
+                    print("Executing cmake compile command")
+                    out = subprocess.check_output(f'cmake -S . -B {tmppath} {flags}', shell=True, stderr=subprocess.STDOUT)
 
-                print("sending data to client")
-                self.builder_send_message(cliid, MessageType.Info, out.strip().decode())
+                    print("sending data to client")
+                    self.builder_send_message(cliid, MessageType.Info, out.strip().decode())
 
-                out = subprocess.check_output(f'make -C {tmppath}', shell=True, stderr=subprocess.STDOUT)
+                    out = subprocess.check_output(f'make -C {tmppath}', shell=True, stderr=subprocess.STDOUT)
 
                 self.builder_send_message(cliid, MessageType.Info, out.strip().decode())
 

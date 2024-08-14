@@ -13,7 +13,7 @@
     utils.lib.eachDefaultSystem (system:
     let
       pkgs = import nixpkgs { inherit system; };
-      pkgs_32 = import nixpkgs {
+      pkgs_x86 = import nixpkgs {
         inherit system;
         crossSystem = {
           config = "i686-unknown-linux-gnu";
@@ -21,8 +21,8 @@
       };
       pythonPackages = pkgs.python311Packages;
     in
-    {
-      devShells.default = pkgs.mkShell {
+    rec {
+      devShells.x64_compile = pkgs.mkShell {
         name = "python-venv";
         venvDir = "./.venv-nixos";
         buildInputs = with pkgs; [
@@ -41,19 +41,20 @@
           unset SOURCE_DATE_EPOCH
         '';
       };
-      devShells.x86_compile = pkgs_32.mkShell.override
+      devShells.x86_compile = pkgs_x86.mkShell.override
         {
-          stdenv = pkgs_32.clangStdenv;
+          stdenv = pkgs_x86.clangStdenv;
         }
         {
-          packages = with pkgs_32; [
+          packages = with pkgs_x86; [
             cmake
             clang
           ];
-          buildInputs = with pkgs_32;[
+          buildInputs = with pkgs_x86;[
             glibc.static
 
           ];
         };
+      devShells.default = devShells.x64_compile;
     });
 }
