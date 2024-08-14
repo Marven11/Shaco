@@ -16,7 +16,7 @@
       pkgs_32 = import nixpkgs {
         inherit system;
         crossSystem = {
-          config = "i686-unknown-linux-musl";
+          config = "i686-unknown-linux-gnu";
         };
       };
       pythonPackages = pkgs.python311Packages;
@@ -41,8 +41,17 @@
           unset SOURCE_DATE_EPOCH
         '';
       };
-      devShells.x86_compile = pkgs_32.mkShell {
-        packages = [  ]; # your dependencies here
-      };
+      devShells.x86_compile = pkgs_32.mkShell.override
+        {
+          stdenv = pkgs_32.pkgsi686Linux.clangStdenv;
+        }
+        {
+          packages = with pkgs_32; [
+            cmake
+            glibc.static
+            glibc
+            clang
+          ];
+        };
     });
 }
