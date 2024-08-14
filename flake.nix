@@ -1,6 +1,7 @@
 {
   inputs = {
     utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
   };
 
   outputs =
@@ -12,6 +13,12 @@
     utils.lib.eachDefaultSystem (system:
     let
       pkgs = import nixpkgs { inherit system; };
+      pkgs_32 = import nixpkgs {
+        inherit system;
+        crossSystem = {
+          config = "i686-unknown-linux-musl";
+        };
+      };
       pythonPackages = pkgs.python311Packages;
     in
     {
@@ -34,7 +41,8 @@
           unset SOURCE_DATE_EPOCH
         '';
       };
-
-
+      devShells.x86_compile = pkgs_32.mkShell {
+        packages = [  ]; # your dependencies here
+      };
     });
 }
