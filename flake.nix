@@ -46,9 +46,8 @@
           stdenv = pkgs_x86.clangStdenv;
         }
         {
-          packages = with pkgs_x86; [
+          packages = with pkgs; [
             cmake
-            clang
           ];
           buildInputs = with pkgs_x86;[
             glibc.static

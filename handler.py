@@ -198,7 +198,7 @@ class Shaco(AgentType):
     Description = f"""Shaco payload, version: {Version}"""
     MagicValue = 0x6861636F
 
-    Arch = ["x64", "x86", "arm"]
+    Arch = ["x64", "x86"]
 
     Formats = [
         {"Name": "Linux Executable", "Extension": "elf"},
@@ -266,7 +266,7 @@ class Shaco(AgentType):
             with open("./Config/Settings.c", "r") as cfg:
                 original_cfg_data = cfg.read()
 
-            supported_arch = ["x86", "x64", "arm"]
+            supported_arch = ["x86", "x64"]
             config_vars = [
                 "%IP%",
                 "%ENDPOINT%",
